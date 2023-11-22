@@ -1,0 +1,51 @@
+---
+version: '3.8'
+
+networks:
+  local:
+
+services:
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:18.0.2-legacy
+    networks:
+      local:
+    ports:
+      - '8080:8080'
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloakdb
+      DB_DATABASE: root
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: password
+    volumes:
+      - ./conf/standalone.xml:/opt/jboss/keycloak/standalone/configuration/standalone.xml
+
+  keycloakdb:
+    image: postgres:13-alpine
+    container_name: keycloakdb
+    networks:
+      local:
+    environment:
+      POSTGRES_DB: "root"
+      POSTGRES_USER: "keycloak"
+      POSTGRES_PASSWORD: "password"
+## Uncomment volumes if/when you want to mount in the pgdump.sql file from there
+#    volumes:
+#      - ./restore/:/tmp/restore/
+
+## Uncomment dumpdb if/when you want to import the existing files into this new instance
+#  dumpdb:
+#    image: postgres:10-alpine
+#    container_name: dumpdb
+#    networks:
+#      local:
+#    environment:
+#      POSTGRES_DB: "root"
+#      POSTGRES_USER: "keycloak"
+#      POSTGRES_PASSWORD: "password"
+#    volumes:
+#      - ./backup/:/var/lib/postgresql/data/
